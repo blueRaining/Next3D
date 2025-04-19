@@ -1,0 +1,152 @@
+<html lang="en">
+
+<head>
+	<title>模型加载</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="./main.css">
+	<script src="./libs/draco_encoder.js"></script>
+	<script src="./libs/draco_decoder.js"></script>
+	<script src="./libs/jszip.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"RainViewer": "./jsm/sdk/RainViewer.js",
+				"addons/": "./libs/" 
+			 
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="info">
+		<a href="http://babylonjsx.cn/portfolio.html" target="_blank" rel="noopener">Next3D</a>模型加载
+	</div>
+	<div id="canvas-container">
+
+		<canvas id="renderCanvas"></canvas>
+	</div>
+
+
+	<script type="module">
+		import {
+			Viewer,
+			MaterialMRTPlugin,
+			BackgroundPlugin,
+ 
+			LightGeneratorPlugin,
+			DepthNormalRenderPlugin,
+			MaterialInfoPlugin,
+			CombineRefractionPlugin,
+			SceneOutPutPlugin,
+			SubSurfaceScatteringPlugin,
+			RefractionPlugin,
+			SketchPlugin,
+			GTAOPlugin,
+			SSR2Plugin,
+			DeferredLightPlugin,
+			TAAPlugin,
+			DiffusionWavePlugin,
+			BloomPlugin,
+			HeightFogPlugin,
+			RainPlugin,
+			SnowPlugin,
+			OutlinePlugin,
+			MSAAPlugin,
+			ScenePassPlugin,
+			ColorCorrectionPlugin,
+			ChromaticAberrationPlugin,
+			VignettePlugin,
+			AnimationPlugin,
+			BaseObjectGeneratorPlugin,
+			MaterialInteractivePlugin,
+			PathPlugin
+		} from 'RainViewer';
+		import Stats from 'addons/stats.module.js';
+		import { GUI } from 'addons/lil-gui.module.min.js';
+		const stats = new Stats();
+		document.body.appendChild(stats.dom);
+		const gui = new GUI();
+		const state = { 模型环境球: '环境球1',环境球亮度:1.5,环境球旋转:1.65 };
+	 
+		const envirments = {
+				'环境球1': './envirments/environment1.env',
+				'环境球2':'./envirments/environment.env',
+				'环境球3': './envirments/environment2.env',
+				'环境球4': './envirments/environment3.env',
+				'环境球5':'./envirments/adams_place_bridge_1k.hdr',
+			 
+			};
+		gui.add( state, '模型环境球', envirments).onChange( setEnvirment );
+		gui.add(state, '环境球亮度').min(0.0).max(5).step(0.01).onChange((value) => {
+			viewer.scene.environmentIntensity=value;
+
+		});
+		gui.add(state, '环境球旋转').min(-Math.PI).max(Math.PI).step(0.01).onChange((value) => {
+			viewer.scene.environmentTexture.rotationY=value;
+
+		});
+		let viewer = new Viewer({ canvas: document.getElementById("renderCanvas") });
+		viewer.addEventListener("postFrame", ()=>{
+			stats.update();
+		});
+		async function setEnvirment(
+			url ) {
+			await  viewer.setEnvirment(url);
+		}
+		async function initPlugins() {
+			await viewer.addPlugins([
+				new MaterialMRTPlugin(),
+				new BackgroundPlugin(),
+			 
+				// new AblationPlugin(),
+				new LightGeneratorPlugin(),
+				new DepthNormalRenderPlugin(),
+				new MaterialInfoPlugin(),
+				new CombineRefractionPlugin(),
+				new SceneOutPutPlugin(),
+
+				// new SSAOPlugin(),
+
+				new SubSurfaceScatteringPlugin(),
+				new RefractionPlugin(),
+				new SketchPlugin(),
+				new GTAOPlugin(),
+				new SSR2Plugin(),
+				new DeferredLightPlugin(),
+				// new ProgressivePlugin(),
+				new TAAPlugin(),
+				new DiffusionWavePlugin(),
+				new BloomPlugin(),
+				new HeightFogPlugin("./images/noise.png"),
+				new RainPlugin("./images/RippleTex.png"),
+				new SnowPlugin(),
+				new OutlinePlugin(),
+				new MSAAPlugin(),
+
+				new ScenePassPlugin(),
+				new ColorCorrectionPlugin(),
+				new ChromaticAberrationPlugin(),
+				new VignettePlugin(),
+				//功能插件
+
+				new AnimationPlugin(),
+
+				new BaseObjectGeneratorPlugin(),
+
+				new MaterialInteractivePlugin(),
+				new PathPlugin("./images/truckRoute.png"),
+			]);
+
+		}
+		await initPlugins()
+		viewer.loadModel("./models/%E8%BD%A6%E8%BE%86.rain")
+		// stats.update();
+
+
+	</script>
+</body>
+
+</html>

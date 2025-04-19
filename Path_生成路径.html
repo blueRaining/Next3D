@@ -1,0 +1,189 @@
+<html lang="en">
+
+<head>
+	<title>GTAO</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="./main.css">
+	<script src="./libs/draco_encoder.js"></script>
+	<script src="./libs/draco_decoder.js"></script>
+	<script src="./libs/jszip.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"RainViewer": "./jsm/sdk/RainViewer.js",
+				"addons/": "./libs/" 
+			 
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="info">
+		<a href="http://babylonjsx.cn/portfolio.html" target="_blank" rel="noopener">Next3D</a>模型加载
+	</div>
+	<div id="canvas-container">
+
+		<canvas id="renderCanvas"></canvas>
+	</div>
+
+
+	<script type="module">
+		import {
+			Viewer,
+			MaterialMRTPlugin,
+			BackgroundPlugin,
+			EnvirmentPlugin,
+			LightGeneratorPlugin,
+			DepthNormalRenderPlugin,
+			MaterialInfoPlugin,
+			CombineRefractionPlugin,
+			SceneOutPutPlugin,
+			SubSurfaceScatteringPlugin,
+			RefractionPlugin,
+			SketchPlugin,
+			GTAOPlugin,
+			SSR2Plugin,
+			DeferredLightPlugin,
+			TAAPlugin,
+			DiffusionWavePlugin,
+			BloomPlugin,
+			HeightFogPlugin,
+			RainPlugin,
+			SnowPlugin,
+			OutlinePlugin,
+			MSAAPlugin,
+			ScenePassPlugin,
+			ColorCorrectionPlugin,
+			ChromaticAberrationPlugin,
+			VignettePlugin,
+			AnimationPlugin,
+			BaseObjectGeneratorPlugin,
+			MaterialInteractivePlugin,
+			PathPlugin,
+			BABYLON,
+			PickerPlugin
+		} from 'RainViewer';
+		import Stats from 'addons/stats.module.js';
+		import { GUI } from 'addons/lil-gui.module.min.js';
+		const stats = new Stats();
+		document.body.appendChild(stats.dom);
+		const gui = new GUI();
+		let light;
+		const state = {
+			显示节点: true,
+			新增节点: function () {
+				viewer.getPlugin(PathPlugin).addNewPath3DNode(pathId)
+			},
+			进度: 1,
+			箭头: false,
+			类型: "双边"
+		};
+		const side = {
+			"双边": "both",
+			"左边": "left",
+			"右边": "right",
+		}
+		gui.add(state, '显示节点').onChange((value) => {
+			viewer.getPlugin(PathPlugin).showPath3DHelper(pathId, value)
+		});
+
+		gui.add(state, '新增节点');
+		gui.add(state, '进度').min(0).max(1).step(0.01).onChange((value) => {
+			let path3D = viewer.getPlugin(PathPlugin).path3DMap.get(pathId);
+			path3D.update(path3D.pathPointList, {
+				radius: path3D.radius,
+				radialSegments: path3D.radialSegments,
+				startRad: path3D.startRad,
+				progress: value,
+			});
+
+		});
+		gui.add(state, '箭头').onChange((value) => {
+			let path3D = viewer.getPlugin(PathPlugin).path3DMap.get(pathId);
+			path3D.update(path3D.pathPointList, {
+				width: path3D.width,
+				progress: path3D.progress,
+				arrow: value,
+				side: path3D.side,
+			});
+		});
+		gui.add(state, '类型',side).onChange((value) => {
+			let path3D = viewer.getPlugin(PathPlugin).path3DMap.get(pathId);
+			path3D.update(path3D.pathPointList, {
+				width: path3D.width,
+				progress: path3D.progress,
+				arrow: path3D.arrow,
+				side: value,
+			});
+		});
+		let viewer = new Viewer({ canvas: document.getElementById("renderCanvas") });
+		viewer.addEventListener("postFrame", () => {
+			stats.update();
+			 
+		});
+		async function initPlugins() {
+			await viewer.addPlugins([
+				new PickerPlugin(),
+				new MaterialMRTPlugin(),
+				new BackgroundPlugin(),
+				new EnvirmentPlugin(),
+				new LightGeneratorPlugin(),
+				new DepthNormalRenderPlugin(),
+				new MaterialInfoPlugin(),
+				new CombineRefractionPlugin(),
+				new SceneOutPutPlugin(),
+				new SubSurfaceScatteringPlugin(),
+				new RefractionPlugin(),
+				new SketchPlugin(),
+				new GTAOPlugin(),
+				new SSR2Plugin(),
+				new DeferredLightPlugin(),
+				new TAAPlugin(),
+				new DiffusionWavePlugin(),
+				new BloomPlugin(),
+				new HeightFogPlugin("./images/noise.png"),
+				new RainPlugin("./images/RippleTex.png"),
+				new SnowPlugin(),
+				new OutlinePlugin(),
+				new MSAAPlugin(),
+				new ScenePassPlugin(),
+				new ColorCorrectionPlugin(),
+				new ChromaticAberrationPlugin(),
+				new VignettePlugin(),
+
+				new AnimationPlugin(),
+
+				new BaseObjectGeneratorPlugin(),
+
+				new MaterialInteractivePlugin(),
+				new PathPlugin("./images/truckRoute.png"),
+			]);
+
+		}
+		await initPlugins();
+		await viewer.setEnvirment("./envirments/environment.env");
+		let pathId = viewer.getPlugin(PathPlugin).createPath3D({
+			positionList: [new BABYLON.Vector3(0, 0, 0),
+			new BABYLON.Vector3(1, 0, 0),
+		 
+			new BABYLON.Vector3(2, 0, 0.64),
+			new BABYLON.Vector3(2.8, 0, -0.21),
+			]
+		})
+		let material = viewer.getPlugin(PathPlugin).path3DMap.get(pathId).path.material;
+		material.opacityTexture.metadata = material.opacityTexture.metadata || {};
+		material.opacityTexture.metadata.animationUSpeed = -0.016;
+		material.opacityTexture.metadata.animationVSpeed = 0;
+		// material.opacityTexture.uScale = -1;
+		material.opacityTexture.metadata.uvAnimation = true;
+		viewer.camera.alpha = 1.65;
+		viewer.camera.beta = 0.15
+		viewer.camera.radius = 3.444
+		viewer.camera.target.set(1.25, 0.15, -0.07)
+	</script>
+</body>
+
+</html>

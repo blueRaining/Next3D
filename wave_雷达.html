@@ -1,0 +1,166 @@
+<html lang="en">
+
+<head>
+	<title>模型加载</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="./main.css">
+	<script src="./libs/draco_encoder.js"></script>
+	<script src="./libs/draco_decoder.js"></script>
+	<script src="./libs/jszip.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"RainViewer": "./jsm/sdk/RainViewer.js",
+				"addons/": "./libs/" 
+			 
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="info">
+		<a href="http://babylonjsx.cn/portfolio.html" target="_blank" rel="noopener">Next3D</a>模型加载
+	</div>
+	<div id="canvas-container">
+
+		<canvas id="renderCanvas"></canvas>
+	</div>
+
+
+	<script type="module">
+		import {
+			Viewer,
+			MaterialMRTPlugin,
+			BackgroundPlugin,
+			EnvirmentPlugin,
+			LightGeneratorPlugin,
+			DepthNormalRenderPlugin,
+			MaterialInfoPlugin,
+			CombineRefractionPlugin,
+			SceneOutPutPlugin,
+			SubSurfaceScatteringPlugin,
+			RefractionPlugin,
+			SketchPlugin,
+			GTAOPlugin,
+			SSR2Plugin,
+			DeferredLightPlugin,
+			TAAPlugin,
+			DiffusionWavePlugin,
+			BloomPlugin,
+			HeightFogPlugin,
+			RainPlugin,
+			SnowPlugin,
+			OutlinePlugin,
+			MSAAPlugin,
+			ScenePassPlugin,
+			ColorCorrectionPlugin,
+			ChromaticAberrationPlugin,
+			VignettePlugin,
+			AnimationPlugin,
+			BaseObjectGeneratorPlugin,
+			MaterialInteractivePlugin,
+			PathPlugin,
+			BABYLON
+		} from 'RainViewer';
+		import Stats from 'addons/stats.module.js';
+		import { GUI } from 'addons/lil-gui.module.min.js';
+		const stats = new Stats();
+		document.body.appendChild(stats.dom);
+		const gui = new GUI();
+		const state = {
+			半径: 200,
+			速度: 0.01,
+			亮度: 5,
+			颜色: "#00ff00",
+		};
+		gui.add(state, '半径').min(0).max(500).step(1).onChange((value) => {
+			circleWave.radius = value;
+		});
+		gui.add(state, '速度').min(0).max(0.1).step(0.001).onChange((value) => {
+			circleWave.speed = value;
+		});
+ 
+		gui.add(state, '亮度').min(0).max(20).step(0.1).onChange((value) => {
+			circleWave.fade = value;
+		});
+		gui.addColor(state, '颜色').onChange((value) => {
+			circleWave.color = new BABYLON.Color3.FromHexString(value);
+		});
+
+
+		let viewer = new Viewer({ canvas: document.getElementById("renderCanvas") });
+		viewer.addEventListener("postFrame", () => {
+			stats.update();
+		});
+		async function loadModel(
+			url,
+			options = {
+				autoUpdateCamera: true,
+				clearSceneObjects: true,
+				autoLoolAtCenter: true,
+			}
+		) {
+			await viewer.loadModel(url, options);
+		}
+		async function initPlugins() {
+			await viewer.addPlugins([
+				new MaterialMRTPlugin(),
+				new BackgroundPlugin(),
+				new EnvirmentPlugin(),
+				// new AblationPlugin(),
+				new LightGeneratorPlugin(),
+				new DepthNormalRenderPlugin(),
+				new MaterialInfoPlugin(),
+				new CombineRefractionPlugin(),
+				new SceneOutPutPlugin(),
+
+				// new SSAOPlugin(),
+
+				new SubSurfaceScatteringPlugin(),
+				new RefractionPlugin(),
+				new SketchPlugin(),
+				new GTAOPlugin(),
+				new SSR2Plugin(),
+				new DeferredLightPlugin(),
+				// new ProgressivePlugin(),
+				new TAAPlugin(),
+				new DiffusionWavePlugin(),
+				new BloomPlugin(),
+				new HeightFogPlugin("./images/noise.png"),
+				new RainPlugin("./images/RippleTex.png"),
+				new SnowPlugin(),
+				new OutlinePlugin(),
+				new MSAAPlugin(),
+
+				new ScenePassPlugin(),
+				new ColorCorrectionPlugin(),
+				new ChromaticAberrationPlugin(),
+				new VignettePlugin(),
+				//功能插件
+
+				new AnimationPlugin(),
+
+				new BaseObjectGeneratorPlugin(),
+
+				new MaterialInteractivePlugin(),
+				new PathPlugin("./images/truckRoute.png"),
+			]);
+
+		}
+		await initPlugins()
+		await loadModel("./models/%E5%B7%A5%E5%8E%82.rain")
+		let circleWave = viewer.getPlugin(DiffusionWavePlugin).createRadarWave();
+		circleWave.radius = 200;
+		circleWave.speed = 0.01;
+	 
+		circleWave.fade = 0.73;
+		circleWave.color = new BABYLON.Color3(0, 1, 0);
+		 
+
+	</script>
+</body>
+
+</html>

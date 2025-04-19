@@ -1,0 +1,173 @@
+<html lang="en">
+
+<head>
+	<title>GTAO</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="./main.css">
+	<script src="./libs/draco_encoder.js"></script>
+	<script src="./libs/draco_decoder.js"></script>
+	<script src="./libs/jszip.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"RainViewer": "./jsm/sdk/RainViewer.js",
+				"addons/": "./libs/" 
+			 
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="info">
+		<a href="http://babylonjsx.cn/portfolio.html" target="_blank" rel="noopener">Next3D</a>模型加载
+	</div>
+	<div id="canvas-container">
+
+		<canvas id="renderCanvas"></canvas>
+	</div>
+
+
+	<script type="module">
+		import {
+			Viewer,
+			MaterialMRTPlugin,
+			BackgroundPlugin,
+			EnvirmentPlugin,
+			LightGeneratorPlugin,
+			DepthNormalRenderPlugin,
+			MaterialInfoPlugin,
+			CombineRefractionPlugin,
+			SceneOutPutPlugin,
+			SubSurfaceScatteringPlugin,
+			RefractionPlugin,
+			SketchPlugin,
+			GTAOPlugin,
+			SSR2Plugin,
+			DeferredLightPlugin,
+			TAAPlugin,
+			DiffusionWavePlugin,
+			BloomPlugin,
+			HeightFogPlugin,
+			RainPlugin,
+			SnowPlugin,
+			OutlinePlugin,
+			MSAAPlugin,
+			ScenePassPlugin,
+			ColorCorrectionPlugin,
+			ChromaticAberrationPlugin,
+			VignettePlugin,
+			AnimationPlugin,
+			BaseObjectGeneratorPlugin,
+			MaterialInteractivePlugin,
+			PathPlugin
+		} from 'RainViewer';
+		import Stats from 'addons/stats.module.js';
+		import { GUI } from 'addons/lil-gui.module.min.js';
+		const stats = new Stats();
+		document.body.appendChild(stats.dom);
+		const gui = new GUI();
+		const state = {
+			启动: true,
+			雪花大小: 1.96,
+		    下雪速度:5.4,
+			密度:2.9,
+			角度:0,
+			强度:1,
+			下雪强度:1,
+			积雪强度:1
+
+		};
+
+		gui.add(state, '启动').onChange((value) => {
+			viewer.getPlugin(SnowPlugin).enabled=value;
+		});
+        gui.add(state, '雪花大小').min(0).max(3).step(0.01).onChange((value) => {
+			viewer.getPlugin(SnowPlugin).size=value;
+		});
+		gui.add(state, '下雪速度').min(0).max(10).step(0.01).onChange((value) => {
+			viewer.getPlugin(SnowPlugin).speed=value;
+		});		
+		gui.add(state, '密度').min(0).max(5).step(0.01).onChange((value) => {
+			viewer.getPlugin(SnowPlugin).density=value;
+		});
+		gui.add(state, '角度').min(-60).max(60).step(0.01).onChange((value) => {
+			viewer.getPlugin(SnowPlugin).angle=value;
+		});
+ 
+		gui.add(state, '下雪强度').min(0).max(10).step(0.01).onChange((value) => {
+			viewer.getPlugin(SnowPlugin).strength=value;
+		});
+		gui.add(state, '积雪强度').min(0).max(1).step(0.01).onChange((value) => {
+			viewer.getPlugin(SnowPlugin).coverStrength=value;
+		});
+		let viewer = new Viewer({ canvas: document.getElementById("renderCanvas") });
+		viewer.addEventListener("postFrame", () => {
+			stats.update();
+		});
+		async function loadModel(
+			url,
+			options = {
+				autoUpdateCamera: true,
+				clearSceneObjects: true,
+				autoLoolAtCenter: true,
+			}
+		) {
+			await viewer.loadModel(url, options);
+		}
+		async function initPlugins() {
+			await viewer.addPlugins([
+				new MaterialMRTPlugin(),
+				new BackgroundPlugin(),
+				new EnvirmentPlugin(),
+				// new AblationPlugin(),
+				new LightGeneratorPlugin(),
+				new DepthNormalRenderPlugin(),
+				new MaterialInfoPlugin(),
+				new CombineRefractionPlugin(),
+				new SceneOutPutPlugin(),
+
+				// new SSAOPlugin(),
+
+				new SubSurfaceScatteringPlugin(),
+				new RefractionPlugin(),
+				new SketchPlugin(),
+				new GTAOPlugin(),
+				new SSR2Plugin(),
+				new DeferredLightPlugin(),
+				// new ProgressivePlugin(),
+				new TAAPlugin(),
+				new DiffusionWavePlugin(),
+				new BloomPlugin(),
+				new HeightFogPlugin("./images/noise.png"),
+				new RainPlugin("./images/RippleTex.png"),
+				new SnowPlugin(),
+				new OutlinePlugin(),
+				new MSAAPlugin(),
+
+				new ScenePassPlugin(),
+				new ColorCorrectionPlugin(),
+				new ChromaticAberrationPlugin(),
+				new VignettePlugin(),
+				//功能插件
+
+				new AnimationPlugin(),
+
+				new BaseObjectGeneratorPlugin(),
+
+				new MaterialInteractivePlugin(),
+				new PathPlugin("./images/truckRoute.png"),
+			]);
+
+		}
+		await initPlugins()
+		await loadModel("./models/%E4%B8%8B%E9%9B%AA.rain");
+		 
+
+
+	</script>
+</body>
+
+</html>

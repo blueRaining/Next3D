@@ -1,0 +1,151 @@
+<html lang="en">
+
+<head>
+	<title>模型加载</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="./main.css">
+	<script src="./libs/draco_encoder.js"></script>
+	<script src="./libs/draco_decoder.js"></script>
+	<script src="./libs/jszip.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"RainViewer": "./jsm/sdk/RainViewer.js",
+				"addons/": "./libs/" 
+			 
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="info">
+		<a href="http://babylonjsx.cn/portfolio.html" target="_blank" rel="noopener">Next3D</a>模型加载
+	</div>
+	<div id="canvas-container">
+
+		<canvas id="renderCanvas"></canvas>
+	</div>
+
+
+	<script type="module">
+		import {
+			Viewer,
+			MaterialMRTPlugin,
+			BackgroundPlugin,
+			EnvirmentPlugin,
+			LightGeneratorPlugin,
+			DepthNormalRenderPlugin,
+			MaterialInfoPlugin,
+			CombineRefractionPlugin,
+			SceneOutPutPlugin,
+			SubSurfaceScatteringPlugin,
+			RefractionPlugin,
+			SketchPlugin,
+			GTAOPlugin,
+			SSR2Plugin,
+			DeferredLightPlugin,
+			TAAPlugin,
+			DiffusionWavePlugin,
+			BloomPlugin,
+			HeightFogPlugin,
+			RainPlugin,
+			SnowPlugin,
+			OutlinePlugin,
+			MSAAPlugin,
+			ScenePassPlugin,
+			ColorCorrectionPlugin,
+			ChromaticAberrationPlugin,
+			VignettePlugin,
+			AnimationPlugin,
+			BaseObjectGeneratorPlugin,
+			MaterialInteractivePlugin,
+			PickerPlugin,
+			PathPlugin
+		} from 'RainViewer';
+		import Stats from 'addons/stats.module.js';
+		import { GUI } from 'addons/lil-gui.module.min.js';
+		const stats = new Stats();
+		document.body.appendChild(stats.dom);
+		const gui = new GUI();
+		const state = { 模型: '球体' };
+ 
+		const MOLECULES = {
+				'球体': 'Sphere',
+				'正方体': 'Box',
+				'圆柱': 'Cylinder',
+				'圆锥': 'Cone',
+				'胶囊体': 'Capsule',
+				'圆环': 'Torus',
+				'平面': 'Plane',
+				'地面': 'Ground',
+				 
+			 
+			};
+		gui.add( state, '模型', MOLECULES).onChange( createObject );
+
+		let viewer = new Viewer({ canvas: document.getElementById("renderCanvas") });
+		viewer.addEventListener("postFrame", ()=>{
+			stats.update();
+		});
+		async function createObject(type) {
+			viewer.getPlugin(BaseObjectGeneratorPlugin).createObject(type);
+		}
+		async function initPlugins() {
+			await viewer.addPlugins([
+				new PickerPlugin(),
+				new MaterialMRTPlugin(),
+				new BackgroundPlugin(),
+				new EnvirmentPlugin(),
+				// new AblationPlugin(),
+				new LightGeneratorPlugin(),
+				new DepthNormalRenderPlugin(),
+				new MaterialInfoPlugin(),
+				new CombineRefractionPlugin(),
+				new SceneOutPutPlugin(),
+
+				// new SSAOPlugin(),
+
+				new SubSurfaceScatteringPlugin(),
+				new RefractionPlugin(),
+				new SketchPlugin(),
+				new GTAOPlugin(),
+				new SSR2Plugin(),
+				new DeferredLightPlugin(),
+				// new ProgressivePlugin(),
+				new TAAPlugin(),
+				new DiffusionWavePlugin(),
+				new BloomPlugin(),
+				new HeightFogPlugin("./images/noise.png"),
+				new RainPlugin("./images/RippleTex.png"),
+				new SnowPlugin(),
+				new OutlinePlugin(),
+				new MSAAPlugin(),
+
+				new ScenePassPlugin(),
+				new ColorCorrectionPlugin(),
+				new ChromaticAberrationPlugin(),
+				new VignettePlugin(),
+				//功能插件
+
+				new AnimationPlugin(),
+
+				new BaseObjectGeneratorPlugin(),
+
+				new MaterialInteractivePlugin(),
+				new PathPlugin("./images/truckRoute.png"),
+			]);
+
+		}
+		await initPlugins()
+		await  viewer.setEnvirment('./envirments/environment1.env');
+		viewer.getPlugin(BaseObjectGeneratorPlugin).createObject("Sphere");
+		// stats.update();
+
+
+	</script>
+</body>
+
+</html>

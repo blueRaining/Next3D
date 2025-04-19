@@ -1,0 +1,262 @@
+<html lang="en">
+
+<head>
+	<title>GTAO</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="./main.css">
+	<script src="./libs/draco_encoder.js"></script>
+	<script src="./libs/draco_decoder.js"></script>
+	<script src="./libs/jszip.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"RainViewer": "./jsm/sdk/RainViewer.js",
+				"addons/": "./libs/" 
+			 
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="info">
+		<a href="http://babylonjsx.cn/portfolio.html" target="_blank" rel="noopener">Next3D</a>模型加载
+	</div>
+	<div id="canvas-container">
+
+		<canvas id="renderCanvas"></canvas>
+	</div>
+
+
+	<script type="module">
+		import {
+			Viewer,
+			MaterialMRTPlugin,
+			BackgroundPlugin,
+			EnvirmentPlugin,
+			LightGeneratorPlugin,
+			DepthNormalRenderPlugin,
+			MaterialInfoPlugin,
+			CombineRefractionPlugin,
+			SceneOutPutPlugin,
+			SubSurfaceScatteringPlugin,
+			RefractionPlugin,
+			SketchPlugin,
+			GTAOPlugin,
+			SSR2Plugin,
+			DeferredLightPlugin,
+			TAAPlugin,
+			DiffusionWavePlugin,
+			BloomPlugin,
+			HeightFogPlugin,
+			RainPlugin,
+			SnowPlugin,
+			OutlinePlugin,
+			MSAAPlugin,
+			ScenePassPlugin,
+			ColorCorrectionPlugin,
+			ChromaticAberrationPlugin,
+			VignettePlugin,
+			AnimationPlugin,
+			BaseObjectGeneratorPlugin,
+			MaterialInteractivePlugin,
+			PathPlugin,
+			VolumePlugin,
+			PickerPlugin,
+
+			BABYLON
+		} from 'RainViewer';
+		import Stats from 'addons/stats.module.js';
+		import { GUI } from 'addons/lil-gui.module.min.js';
+		const stats = new Stats();
+		document.body.appendChild(stats.dom);
+		let mesh=null
+		let viewer = new Viewer({ canvas: document.getElementById("renderCanvas") });
+		viewer.addEventListener("postFrame", () => {
+	 
+			stats.update();
+		});
+		async function loadModel(
+			url,
+			options = {
+				autoUpdateCamera: true,
+				clearSceneObjects: true,
+				autoLoolAtCenter: true,
+			}
+		) {
+			await viewer.loadModel(url, options);
+		}
+		async function initPlugins() {
+			await viewer.addPlugins([
+				new PickerPlugin(),
+				new VolumePlugin("./images/platte2.png"),
+				new MaterialMRTPlugin(),
+				new BackgroundPlugin(),
+				new EnvirmentPlugin(),
+				// new AblationPlugin(),
+				new LightGeneratorPlugin(),
+				new DepthNormalRenderPlugin(),
+				new MaterialInfoPlugin(),
+				new CombineRefractionPlugin(),
+				new SceneOutPutPlugin(),
+
+				// new SSAOPlugin(),
+
+				new SubSurfaceScatteringPlugin(),
+				new RefractionPlugin(),
+				new SketchPlugin(),
+				new GTAOPlugin(),
+				new SSR2Plugin(),
+				new DeferredLightPlugin(),
+				// new ProgressivePlugin(),
+				new TAAPlugin(),
+				new DiffusionWavePlugin(),
+				new BloomPlugin(),
+				new HeightFogPlugin("./images/noise.png"),
+				new RainPlugin("./images/RippleTex.png"),
+				new SnowPlugin(),
+				new OutlinePlugin(),
+				new MSAAPlugin(),
+
+				new ScenePassPlugin(),
+				new ColorCorrectionPlugin(),
+				new ChromaticAberrationPlugin(),
+				new VignettePlugin(),
+				//功能插件
+
+				new AnimationPlugin(),
+
+				new BaseObjectGeneratorPlugin(),
+
+				new MaterialInteractivePlugin(),
+				new PathPlugin("./images/truckRoute.png"),
+			]);
+
+		}
+		await initPlugins()
+		await loadModel("./models/volume.rain");
+		let id = viewer.getPlugin(VolumePlugin).createVolumeBoxByData(
+			{
+				datas: [
+					{
+						position: new BABYLON.Vector3(115, 26, 50),
+						radius: 50,
+						value: 50,
+					},
+					{
+						position: new BABYLON.Vector3(30, 13, 25),
+						radius: 25,
+						value: 30,
+					},
+					{
+						position: new BABYLON.Vector3(200, 13, 25),
+						radius: 25,
+						value: 30,
+					},
+					{
+						position: new BABYLON.Vector3(30, 13, 75),
+						radius: 25,
+						value: 30,
+					},
+					{
+						position: new BABYLON.Vector3(200, 13, 75),
+						radius: 25,
+						value: 30,
+					}
+				],
+				minValue: 0,
+				maxValue: 50,
+			},
+			//   new BABYLON.Vector3(50, 50, 50),
+			new BABYLON.Vector3(230, 26, 100),
+			new BABYLON.Vector2(128, 56),
+			8
+		);
+		  let data =  viewer.getPlugin(VolumePlugin).volumeMap.get(id);
+		  mesh=data.boxFrontFacing;
+		  mesh.position.set(-62,13,-48);
+		  
+		  // 定义初始数据和目标数据
+		  let currentData = {
+			  datas: [
+				  {
+					  position: new BABYLON.Vector3(115, 26, 50),
+					  radius: 50,
+					  value: 50,
+				  },
+				  {
+					  position: new BABYLON.Vector3(30, 13, 25),
+					  radius: 25,
+					  value: 30,
+				  },
+				  {
+					  position: new BABYLON.Vector3(200, 13, 25),
+					  radius: 25,
+					  value: 30,
+				  },
+				  {
+					  position: new BABYLON.Vector3(30, 13, 75),
+					  radius: 25,
+					  value: 30,
+				  },
+				  {
+					  position: new BABYLON.Vector3(200, 13, 75),
+					  radius: 25,
+					  value: 30,
+				  }
+			  ],
+			  minValue: 0,
+			  maxValue: 50,
+		  };
+
+		  let targetData = JSON.parse(JSON.stringify(currentData));
+		  let interpolationFactor = 0;
+		  const interpolationSpeed = 0.04; // 插值速度
+
+		  // 生成新的目标数据
+		  function generateNewTargetData() {
+			  targetData.datas.forEach(data => {
+				  // 随机生成新的radius和value
+				  data.radius = Math.random() * 30 + 20; // 20-50之间
+				  data.value = Math.random() * 30 + 20; // 20-50之间
+			  });
+		  }
+
+		  // 插值函数
+		  function interpolateData() {
+			  currentData.datas.forEach((data, index) => {
+				  // 对radius和value进行插值
+				  data.radius = data.radius + (targetData.datas[index].radius - data.radius) * interpolationFactor;
+				  data.value = data.value + (targetData.datas[index].value - data.value) * interpolationFactor;
+			  });
+		  }
+
+		  // 更新体渲染数据
+		  function updateVolumeData() {
+			  viewer.getPlugin(VolumePlugin).updateVolumeBoxData(id, currentData);
+		  }
+
+		  // 动画循环
+		  setInterval(() => {
+			  // 更新插值因子
+			  interpolationFactor += interpolationSpeed;
+			  
+			  // 如果插值完成，生成新的目标数据
+			  if (interpolationFactor >= 1) {
+				  interpolationFactor = 0;
+				  generateNewTargetData();
+			  }
+			  
+			  // 执行插值
+			  interpolateData();
+			  
+			  // 更新体渲染
+			  updateVolumeData();
+		  }, 50);
+
+	</script>
+</body>
+
+</html>

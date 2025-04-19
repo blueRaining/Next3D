@@ -1,0 +1,326 @@
+<html lang="en">
+
+<head>
+	<title>模型加载</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="./main.css">
+	<script src="./libs/draco_encoder.js"></script>
+	<script src="./libs/draco_decoder.js"></script>
+	<script src="./libs/jszip.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"RainViewer": "./jsm/sdk/RainViewer.js",
+				"addons/": "./libs/" 
+			 
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="info">
+		<a href="http://babylonjsx.cn/portfolio.html" target="_blank" rel="noopener">Next3D</a>模型加载
+	</div>
+	<div id="canvas-container">
+
+		<canvas id="renderCanvas"></canvas>
+	</div>
+
+
+	<script type="module">
+		import {
+			Viewer,
+			MaterialMRTPlugin,
+			BackgroundPlugin,
+			EnvirmentPlugin,
+			LightGeneratorPlugin,
+			DepthNormalRenderPlugin,
+			MaterialInfoPlugin,
+			CombineRefractionPlugin,
+			SceneOutPutPlugin,
+			SubSurfaceScatteringPlugin,
+			RefractionPlugin,
+			SketchPlugin,
+			GTAOPlugin,
+			SSR2Plugin,
+			DeferredLightPlugin,
+			TAAPlugin,
+			DiffusionWavePlugin,
+			BloomPlugin,
+			HeightFogPlugin,
+			RainPlugin,
+			SnowPlugin,
+			OutlinePlugin,
+			MSAAPlugin,
+			ScenePassPlugin,
+			ColorCorrectionPlugin,
+			ChromaticAberrationPlugin,
+			VignettePlugin,
+			AnimationPlugin,
+			BaseObjectGeneratorPlugin,
+			MaterialInteractivePlugin,
+			PathPlugin,
+			PickerPlugin
+		} from 'RainViewer';
+		import Stats from 'addons/stats.module.js';
+		import { GUI } from 'addons/lil-gui.module.min.js';
+		const stats = new Stats();
+		document.body.appendChild(stats.dom);
+		const gui = new GUI();
+		{
+			let light1Parameter = {
+				范围: 50.00,
+				颜色: "#393939",
+				衰减: 0.1,
+				强度: 0.5,
+				选中: false,
+			};
+			let light2Parameter = {
+				范围: 50,
+				颜色: "#393939",
+				衰减: 0.1,
+				强度: 0.5,
+				选中: false,
+			};
+			let light3Parameter = {
+				范围: 100,
+				颜色: "#646464",
+				衰减: 0.5,
+				强度: 0.5,
+				选中: false,
+			};
+			let light4Parameter = {
+				范围: 80,
+				颜色: "#686868",
+				衰减: 0.1,
+				强度: 0.5,
+				选中: false,
+			};
+			let light5Parameter = {
+				范围: 50,
+				颜色: "#464646",
+				衰减: 0.1,
+				强度: 0.5,
+				选中: false,
+			};
+			let light6Parameter = {
+				范围: 300,
+				颜色: "#ffffff",
+				衰减: 0.1,
+				强度: 0.1,
+				选中: false,
+			};
+			let light7Parameter = {
+				范围: 200,
+				颜色: "#ffffff",
+				衰减: 0.1,
+				强度: 0.1,
+				选中: false,
+			};
+			let light1Folder = gui.addFolder("点光源1")
+			let light2Folder = gui.addFolder("点光源2")
+			let light3Folder = gui.addFolder("点光源3")
+			let light4Folder = gui.addFolder("点光源4")
+			let light5Folder = gui.addFolder("点光源5")
+			let light6Folder = gui.addFolder("点光源6")
+			let light7Folder = gui.addFolder("点光源7")
+			light1Folder.close();
+			light2Folder.close();
+			light3Folder.close();
+			light4Folder.close();
+			light5Folder.close();
+			light6Folder.close();
+			light7Folder.close();
+			light1Folder.add(light1Parameter, "范围").min(0).max(500).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[0].lightRange = value;
+			})
+			light1Folder.addColor(light1Parameter, "颜色").onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[0].lightColor = BABYLON.Color3.FromHexString(value);
+			})
+			light1Folder.add(light1Parameter, "衰减").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[0].attenuationFactor = value;
+			})
+			light1Folder.add(light1Parameter, "强度").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[0].lightIntensity = value;
+			})
+			light1Folder.add(light1Parameter, "选中").onChange((value) => {
+				// this.picker.setSelectedModel
+				viewer.getPlugin(PickerPlugin).picker.setSelectedModel(value ? viewer.getPlugin(DeferredLightPlugin).lights[0].transformNode : null);
+			})
+			light2Folder.add(light2Parameter, "范围").min(0).max(500).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[1].lightRange = value;
+			})
+			light2Folder.addColor(light2Parameter, "颜色").onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[1].lightColor = BABYLON.Color3.FromHexString(value);
+			})
+			light2Folder.add(light2Parameter, "衰减").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[1].attenuationFactor = value;
+			})
+			light2Folder.add(light2Parameter, "强度").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[1].lightIntensity = value;
+			})
+			light2Folder.add(light2Parameter, "选中").onChange((value) => {
+				// this.picker.setSelectedModel
+				viewer.getPlugin(PickerPlugin).picker.setSelectedModel(value ? viewer.getPlugin(DeferredLightPlugin).lights[1].transformNode : null);
+			})
+			light3Folder.add(light3Parameter, "范围").min(0).max(500).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[2].lightRange = value;
+			})
+			light3Folder.addColor(light3Parameter, "颜色").onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[2].lightColor = BABYLON.Color3.FromHexString(value);
+			})
+			light3Folder.add(light3Parameter, "衰减").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[2].attenuationFactor = value;
+			})
+			light3Folder.add(light3Parameter, "强度").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[2].lightIntensity = value;
+			})
+			light3Folder.add(light3Parameter, "选中").onChange((value) => {
+				// this.picker.setSelectedModel
+				viewer.getPlugin(PickerPlugin).picker.setSelectedModel(value ? viewer.getPlugin(DeferredLightPlugin).lights[2].transformNode : null);
+			})
+			light4Folder.add(light4Parameter, "范围").min(0).max(500).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[3].lightRange = value;
+			})
+			light4Folder.addColor(light4Parameter, "颜色").onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[3].lightColor = BABYLON.Color3.FromHexString(value);
+			})
+			light4Folder.add(light4Parameter, "衰减").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[3].attenuationFactor = value;
+			})
+			light4Folder.add(light4Parameter, "强度").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[3].lightIntensity = value;
+			})
+			light4Folder.add(light4Parameter, "选中").onChange((value) => {
+				// this.picker.setSelectedModel
+				viewer.getPlugin(PickerPlugin).picker.setSelectedModel(value ? viewer.getPlugin(DeferredLightPlugin).lights[3].transformNode : null);
+			})
+			light5Folder.add(light5Parameter, "范围").min(0).max(500).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[4].lightRange = value;
+			})
+			light5Folder.addColor(light5Parameter, "颜色").onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[4].lightColor = BABYLON.Color3.FromHexString(value);
+			})
+			light5Folder.add(light5Parameter, "衰减").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[4].attenuationFactor = value;
+			})
+			light5Folder.add(light5Parameter, "强度").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[4].lightIntensity = value;
+			})
+			light5Folder.add(light5Parameter, "选中").onChange((value) => {
+				// this.picker.setSelectedModel
+				viewer.getPlugin(PickerPlugin).picker.setSelectedModel(value ? viewer.getPlugin(DeferredLightPlugin).lights[4].transformNode : null);
+			})
+			light6Folder.add(light6Parameter, "范围").min(0).max(500).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[5].lightRange = value;
+			})
+			light6Folder.addColor(light6Parameter, "颜色").onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[5].lightColor = BABYLON.Color3.FromHexString(value);
+			})
+			light6Folder.add(light6Parameter, "衰减").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[5].attenuationFactor = value;
+			})
+			light6Folder.add(light6Parameter, "强度").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[5].lightIntensity = value;
+			})
+			light6Folder.add(light6Parameter, "选中").onChange((value) => {
+				// this.picker.setSelectedModel
+				viewer.getPlugin(PickerPlugin).picker.setSelectedModel(value ? viewer.getPlugin(DeferredLightPlugin).lights[5].transformNode : null);
+			})
+			light7Folder.add(light7Parameter, "范围").min(0).max(500).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[6].lightRange = value;
+			})
+			light7Folder.addColor(light7Parameter, "颜色").onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[6].lightColor = BABYLON.Color3.FromHexString(value);
+			})	
+			light7Folder.add(light7Parameter, "衰减").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[6].attenuationFactor = value;
+			})
+			light7Folder.add(light7Parameter, "强度").min(0).max(1).step(0.01).onChange((value) => {
+				viewer.getPlugin(DeferredLightPlugin).lights[6].lightIntensity = value;
+			})	
+			light7Folder.add(light7Parameter, "选中").onChange((value) => {
+				// this.picker.setSelectedModel
+				viewer.getPlugin(PickerPlugin).picker.setSelectedModel(value ? viewer.getPlugin(DeferredLightPlugin).lights[6].transformNode : null);
+			})
+		}   
+
+
+
+		// const state = { 模型: '车辆' };
+
+
+		// gui.add( state, '模型', MOLECULES).onChange( loadModel );
+
+		let viewer = new Viewer({ canvas: document.getElementById("renderCanvas") });
+		viewer.addEventListener("postFrame", () => {
+			stats.update();
+		});
+		async function loadModel(
+			url,
+			options = {
+				autoUpdateCamera: true,
+				clearSceneObjects: true,
+				autoLoolAtCenter: true,
+			}
+		) {
+			await viewer.loadModel(url, options);
+		}
+		async function initPlugins() {
+			await viewer.addPlugins([
+				new PickerPlugin(),
+				new MaterialMRTPlugin(),
+				new BackgroundPlugin(),
+				new EnvirmentPlugin(),
+				// new AblationPlugin(),
+				new LightGeneratorPlugin(),
+				new DepthNormalRenderPlugin(),
+				new MaterialInfoPlugin(),
+				new CombineRefractionPlugin(),
+				new SceneOutPutPlugin(),
+
+				// new SSAOPlugin(),
+
+				new SubSurfaceScatteringPlugin(),
+				new RefractionPlugin(),
+				new SketchPlugin(),
+				new GTAOPlugin(),
+				new SSR2Plugin(),
+				new DeferredLightPlugin(),
+				// new ProgressivePlugin(),
+				new TAAPlugin(),
+				new DiffusionWavePlugin(),
+				new BloomPlugin(),
+				new HeightFogPlugin("./images/noise.png"),
+				new RainPlugin("./images/RippleTex.png"),
+				new SnowPlugin(),
+				new OutlinePlugin(),
+				new MSAAPlugin(),
+
+				new ScenePassPlugin(),
+				new ColorCorrectionPlugin(),
+				new ChromaticAberrationPlugin(),
+				new VignettePlugin(),
+				//功能插件
+
+				new AnimationPlugin(),
+
+				new BaseObjectGeneratorPlugin(),
+
+				new MaterialInteractivePlugin(),
+				new PathPlugin("./images/truckRoute.png"),
+			]);
+
+		}
+		await initPlugins()
+		await loadModel("./models/%E5%BB%B6%E8%BF%9F%E7%81%AF%E5%85%89%E6%B8%B2%E6%9F%93.rain")
+		// stats.update();
+
+
+	</script>
+</body>
+
+</html>

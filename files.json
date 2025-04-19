@@ -1,0 +1,42 @@
+{
+ 
+	"基础": [
+		"base_加载模型" ,
+		"base_切换环境球" ,
+		"base_背景切换" ,
+		"base_基础模型创建" 
+	],
+	"光源":[
+		 "light_方向光层级阴影",
+		 "light_聚光灯",
+		 "light_点光源"
+	],
+	"管道路径":[
+		"Path_生成路径" ,
+		"Path_生成管道" 
+   ],
+   "扩散波":[
+	 "wave_环形",
+	 "wave_雷达"
+   ],
+   "延迟渲染":[
+	"deferredLight_点光源" ,
+	"deferredLight_聚光灯"
+  ],
+  "体渲染":[
+	 "volume_体渲染"
+  ],
+	"后处理":[
+		"postprocess_gtao",
+		"postprocess_ssr",
+		"postprocess_taa",
+		"postprocess_msaa",
+		"postprocess_bloom",
+		"postprocess_体积雾",
+		"postprocess_雪",
+		"postprocess_雨",
+		"postprocess_色差",
+		"postprocess_暗角"
+	]
+ 
+}

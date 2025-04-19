@@ -1,0 +1,200 @@
+<html lang="en">
+
+<head>
+	<title>GTAO</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="./main.css">
+	<script src="./libs/draco_encoder.js"></script>
+	<script src="./libs/draco_decoder.js"></script>
+	<script src="./libs/jszip.js"></script>
+	<script type="importmap">
+		{
+			"imports": {
+				"RainViewer": "./jsm/sdk/RainViewer.js",
+				"addons/": "./libs/" 
+			 
+			}
+		}
+	</script>
+</head>
+
+<body>
+
+	<div id="info">
+		<a href="http://babylonjsx.cn/portfolio.html" target="_blank" rel="noopener">Next3D</a>模型加载
+	</div>
+	<div id="canvas-container">
+
+		<canvas id="renderCanvas"></canvas>
+	</div>
+
+
+	<script type="module">
+		import {
+			Viewer,
+			MaterialMRTPlugin,
+			BackgroundPlugin,
+			EnvirmentPlugin,
+			LightGeneratorPlugin,
+			DepthNormalRenderPlugin,
+			MaterialInfoPlugin,
+			CombineRefractionPlugin,
+			SceneOutPutPlugin,
+			SubSurfaceScatteringPlugin,
+			RefractionPlugin,
+			SketchPlugin,
+			GTAOPlugin,
+			SSR2Plugin,
+			DeferredLightPlugin,
+			TAAPlugin,
+			DiffusionWavePlugin,
+			BloomPlugin,
+			HeightFogPlugin,
+			RainPlugin,
+			SnowPlugin,
+			OutlinePlugin,
+			MSAAPlugin,
+			ScenePassPlugin,
+			ColorCorrectionPlugin,
+			ChromaticAberrationPlugin,
+			VignettePlugin,
+			AnimationPlugin,
+			BaseObjectGeneratorPlugin,
+			MaterialInteractivePlugin,
+			PathPlugin,
+			BABYLON
+		} from 'RainViewer';
+		import Stats from 'addons/stats.module.js';
+		import { GUI } from 'addons/lil-gui.module.min.js';
+		const stats = new Stats();
+		document.body.appendChild(stats.dom);
+		const gui = new GUI();
+		let light;
+		const state = {
+			启动: true,
+			层级: 2,
+			偏移: 0.00201,
+			阴影强度: 0.060,
+			灯光强度: 0,
+			混合: 0.25,
+			级联分割系数: 0.632,
+
+		};
+
+		gui.add(state, '启动').onChange((value) => {
+			light.shadowEnabled = value;
+		});
+		gui.add(state, '层级').min(2.0).max(4).step(1).onChange((value) => {
+			light.shadowGenerator.numCascades = value;
+
+		});
+		gui.add(state, '偏移').min(0.0).max(0.1).step(0.0001).onChange((value) => {
+			light.shadowGenerator.bias = value;
+
+		});
+		gui.add(state, '阴影强度').min(0.0).max(1).step(0.01).onChange((value) => {
+			light.shadowGenerator.darkness = value;
+
+		});
+		gui.add(state, '灯光强度').min(0.0).max(5).step(0.001).onChange((value) => {
+			light.intensity = value;
+
+		});
+		gui.add(state, '混合').min(0.).max(1).step(0.001).onChange((value) => {
+			light.shadowGenerator.cascadeBlendPercentage = value;
+
+		});
+		gui.add(state, '级联分割系数').min(0.).max(1).step(0.001).onChange((value) => {
+			light.shadowGenerator.lambda = value;
+
+		});
+		let viewer = new Viewer({ canvas: document.getElementById("renderCanvas") });
+		viewer.addEventListener("postFrame", () => {
+			stats.update();
+		});
+		async function loadModel(
+			url,
+			options = {
+				autoUpdateCamera: true,
+				clearSceneObjects: true,
+				autoLoolAtCenter: true,
+			}
+		) {
+			await viewer.loadModel(url, options);
+		}
+		async function initPlugins() {
+			await viewer.addPlugins([
+				new MaterialMRTPlugin(),
+				new BackgroundPlugin(),
+				new EnvirmentPlugin(),
+
+				new LightGeneratorPlugin(),
+				new DepthNormalRenderPlugin(),
+				new MaterialInfoPlugin(),
+				new CombineRefractionPlugin(),
+				new SceneOutPutPlugin(),
+
+
+				new SubSurfaceScatteringPlugin(),
+				new RefractionPlugin(),
+				new SketchPlugin(),
+				new GTAOPlugin(),
+				new SSR2Plugin(),
+				new DeferredLightPlugin(),
+
+				new TAAPlugin(),
+				new DiffusionWavePlugin(),
+				new BloomPlugin(),
+				new HeightFogPlugin("./images/noise.png"),
+				new RainPlugin("./images/RippleTex.png"),
+				new SnowPlugin(),
+				new OutlinePlugin(),
+				new MSAAPlugin(),
+
+				new ScenePassPlugin(),
+				new ColorCorrectionPlugin(),
+				new ChromaticAberrationPlugin(),
+				new VignettePlugin(),
+
+				new AnimationPlugin(),
+
+				new BaseObjectGeneratorPlugin(),
+
+				new MaterialInteractivePlugin(),
+				new PathPlugin("./images/truckRoute.png"),
+			]);
+
+		}
+		await initPlugins()
+		await loadModel("./models/%E6%96%B9%E5%90%91%E5%85%89%E5%B1%82%E7%BA%A7%E9%98%B4%E5%BD%B1.rain");
+		viewer.getPlugin(LightGeneratorPlugin).AddDirectionalLight();
+		light = viewer.getPlugin(LightGeneratorPlugin).lights[0];
+		light.position.set(-21., 66.68, 17.5);
+		light.direction.set(-1., -2, -1);
+		light.shadowEnabled = true;
+
+		light.shadowType = "CascadedShadowGenerator";
+		light.changeShadowType();
+		light.shadowGenerator.numCascades = 2;
+		light.shadowGenerator.bias = 0.00201;
+		light.shadowGenerator.darkness = 0.060;
+
+		light.shadowGenerator.cascadeBlendPercentage = 0.25;
+		light.shadowGenerator.lambda = 0.632;
+		light.shadowGenerator.stabilizeCascades = true;
+		light.shadowGenerator.depthClamp = true;
+		light.shadowGenerator.filter = BABYLON.ShadowGenerator.FILTER_PCF;
+		light.shadowGenerator.shadowMaxZ = 2000;
+		light.shadowGenerator.ShadowMinDistance = 0;
+		light.shadowGenerator.ShadowMaxDistance = 1;
+		light.shadowGenerator.shadowMapSize = 2048;
+		light.intensity = 0;
+
+		// stats.update();
+
+
+	</script>
+</body>
+
+</html>
