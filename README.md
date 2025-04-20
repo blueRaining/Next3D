@@ -1,6 +1,6 @@
 # Next3D
  Next3D是基于babylonjs封装的引擎，主要用于数字孪生和产品展示<br/>
-本仓库代码是基于编辑器http://babylonjsx.cn/home.htmlxsdk<br/>
+本仓库代码是基于编辑器的sdk,http://babylonjsx.cn/home.html<br/>
 案例在线地址：http://babylonjsx.cn/Next3DExample.html<br/>
 B站账号:https://www.bilibili.com/video/BV1FGRfYGEAF?vd_source=c09ca1acc0ddea3bf6282618e498f8b1&spm_id_from=333.788.videopod.sections<br/>
 敢兴趣的朋友可以加QQ2813123482共同学习<br/>
